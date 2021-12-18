@@ -1,9 +1,9 @@
 from dash.dependencies import Output, Input, State
 
-from wildcat_irv.app import app
-from layouts import irv as layout_irv
-from layouts.ballots import populate_table
-from layouts.steps import layout as steps_layout
+from wildcat_irv.app import app, server  # noqa
+from wildcat_irv.layouts import irv as layout_irv
+from wildcat_irv.layouts.ballots import populate_table
+from wildcat_irv.layouts.steps import layout as steps_layout
 
 
 @app.callback(Output('page-content', 'children'),
