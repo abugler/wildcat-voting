@@ -4,4 +4,4 @@ dash_bootstrap_components
 libsass
 plotly
 gunicorn
-slivka-irv
+slivka-irv==1.0.1b0
