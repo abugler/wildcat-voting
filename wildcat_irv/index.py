@@ -10,7 +10,7 @@ from wildcat_irv.layouts.steps import layout as steps_layout
               Input('url', 'pathname'),
               State('irv-ballots-store', 'data'))
 def display_page(pathname, ballot_data):
-    if pathname == '/election':
+    if pathname == '/election' or pathname == '/':
         return layout_irv.layout
     if pathname == '/ballots':
         return populate_table(ballot_data)
@@ -19,4 +19,4 @@ def display_page(pathname, ballot_data):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)  # TODO: figure out how to detect prod.
+    app.run_server()

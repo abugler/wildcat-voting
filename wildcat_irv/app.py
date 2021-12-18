@@ -1,6 +1,7 @@
 # Run this wildcat_irv with `python wildcat_irv.py` and
 # visit http://127.0.0.1:8050/ in your web browser.
 
+import os
 import dash
 from dash import html
 from dash import dcc
@@ -12,10 +13,11 @@ app = dash.Dash(__name__,
                 external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
 
-app.enable_dev_tools(
-    dev_tools_ui=True,
-    dev_tools_serve_dev_bundles=True,
-)
+if os.environ.get("DEBUG_APP", False):
+    app.enable_dev_tools(
+        dev_tools_ui=True,
+        dev_tools_serve_dev_bundles=True,
+    )
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
