@@ -1,0 +1,5 @@
+# slivka-irv do not use slivka-irv on pypi, use master branch on github
+dash
+dash_bootstrap_components
+libsass
+plotly
