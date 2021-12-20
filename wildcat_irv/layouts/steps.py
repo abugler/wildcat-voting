@@ -9,6 +9,7 @@ from dash.dash_table import DataTable
 
 from wildcat_irv.app import app
 from wildcat_irv.layouts.stores import IRVElectionResults
+from wildcat_irv.layouts.table import get_styled_table
 
 RawResults = dict[str, tuple[str, list[dict]]]
 
@@ -54,7 +55,10 @@ layout = [
                 id='steps-bar-chart-div',
                 style={
                     'width': '80%',
-                    'display': 'inline-block'
+                    'display': 'inline-block',
+                    'border-style': 'solid',
+                    'border-width': '1px',
+                    'border-color': 'white'
                 }
             ),
             width=6
@@ -63,7 +67,13 @@ layout = [
             html.Center([
                 html.H2("Current Ballot"),
                 html.Div(id='steps-data-table-div')
-            ], style={'width': '90%'}),
+            ], style={
+                'width': '90%',
+                'border-style': 'solid',
+                'border-width': '1px',
+                'border-color': 'white'
+            }
+            ),
             width=6,
             align='top'
         )
@@ -157,7 +167,8 @@ def populate_bar_chart(
     figure.update_layout(
         xaxis_title='Candidates',
         yaxis_title='Number of First Place Votes',
-        title_text="Current First Place Vote Tallies"
+        title_text="Current First Place Vote Tallies",
+        template='plotly_dark'
     )
     return dcc.Graph(
         figure=figure
@@ -183,27 +194,11 @@ def populate_data_table(
     election_ballot_data = ballot_data[selected_election]
     table_data = []
     for row in election_ballot_data:
-        row = [c for c in row if c in remaining_candidates]
+        row = [c if c in remaining_candidates else None
+               for c in row]
         table_data.append({str(i): vote for i, vote in enumerate(row, start=1)})
     columns = [{"name": f"Choice {i}", "id": str(i)}
                for i in range(1, len(table_data[0]) + 1)]
 
-    table = DataTable(
-        data=table_data,
-        columns=columns,
-        style_header={
-            'backgroundColor': '#836EAA'
-        },
-        style_data={
-            'backgroundColor': '#716C6B',
-            'height': 'auto'
-        },
-        style_cell={
-            'textAlign': 'left'
-        },
-        sort_action='native',
-        editable=False,
-        filter_action='native',
-        fill_width=True
-    )
+    table = get_styled_table(table_data, columns)
     return table

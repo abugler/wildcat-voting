@@ -13,12 +13,6 @@ app = dash.Dash(__name__,
                 external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
 
-if os.environ.get("DEBUG_APP", False):
-    app.enable_dev_tools(
-        dev_tools_ui=True,
-        dev_tools_serve_dev_bundles=True,
-    )
-
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     stores.get_stores(),

@@ -1,3 +1,4 @@
+import os
 from dash.dependencies import Output, Input, State
 
 from wildcat_irv.app import app, server  # noqa
@@ -19,4 +20,5 @@ def display_page(pathname, ballot_data):
 
 
 if __name__ == '__main__':
-    app.run_server()
+    debug = not os.environ.get("HEROKU_PRODUCTION", False)
+    app.run_server(debug=debug)

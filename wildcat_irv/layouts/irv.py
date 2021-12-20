@@ -1,3 +1,4 @@
+from typing import Any
 from io import StringIO
 import dash
 from dash import html
@@ -9,8 +10,10 @@ from dash.dependencies import Output, Input, State
 
 from irv import IRVElection
 from wildcat_connection import WildcatConnectionCSV
+from wildcat_connection.utils import ParsingException
 
 from wildcat_irv.app import app
+from wildcat_irv.layouts.table import get_styled_table
 
 CSV_ENDING = '.csv'
 
@@ -23,63 +26,80 @@ layout = [
         },
         align='end'
     ),
-    dbc.Row(dcc.Upload(
+    dbc.Row(dbc.Col(dcc.Upload(
         id='upload-wc-csv',
         children=html.Div(
             html.Button(
                 children="Upload Wildcat Connection Election",
                 className='raise',
-                style={'width': '50%', 'height': '60px', 'margin': '10px'}
+                style={'width': '100%', 'height': '60px', 'margin': '10px'}
             )
         )
-    )),
-    dbc.Row(html.H3(id='winner-header', children='')),
+    ), width=6), justify='center'),
+    dbc.Row(dbc.Col(
+        html.Div(id='winner-table-div',
+                 style={'width': '100%',
+                        'padding': '0 2em'}),
+        width=6
+    ), justify='center'),
     dbc.Row([
         dbc.Col(dcc.Link(
             html.Button(
                 "IRV computation steps",
-                style={'display': 'none'},
+                hidden=True,
+                style={'width': '100%'},
                 id='steps-link-button'
             ),
             href='/steps'
-        ), style={'display': 'inline'}, width=4),
+        ), style={'display': 'inline'}, width=3),
         dbc.Col(dcc.Link(
             html.Button(
                 "Anonymized Ballots",
-                style={'display': 'none'},
+                hidden=True,
+                style={'width': '100%'},
                 id='ballots-link-button'
             ), href='/ballots'
-        ), style={'display': 'inline'}, width=4)
+        ), style={'display': 'inline'}, width=3)
     ], justify='center')
 ]
 
 
 @app.callback(
-    Output('winner-header', 'children'),
+    Output('winner-table-div', 'children'),
     Output('irv-results-store', 'data'),
     Output('irv-ballots-store', 'data'),
     Input('upload-wc-csv', 'filename'),
     State('upload-wc-csv', 'contents'),
-    State('upload-wc-csv', 'last_modified'),
     prevent_initial_call=True
 )
 def handle_file_upload(
     filename: str,
-    contents: str,
-    last_modified_timestamp: int
-) -> tuple[list, dict, dict]:
+    contents: str
+) -> tuple[Any, dict, dict]:
     """Computes winner from Wildcat Connection Election"""
     if filename is None:
         return dash.no_update, dash.no_update, dash.no_update  # noqa
     if not filename.endswith(CSV_ENDING):
-        return "Incorrect filetype passed!", list(), list()  # noqa
+        return "Incorrect filetype passed!", dash.no_update, dash.no_update  # noqa
     # TODO: If slowness is a problem, then do not write to a tempfile.
     content_type, content_string = contents.split(',')
     decoded = base64.b64decode(content_string)
     with tempfile.NamedTemporaryFile() as tfile:
         tfile.write(decoded)
         tfile.seek(0)
-        ballot = WildcatConnectionCSV(tfile)
+        try:
+            ballot = WildcatConnectionCSV(tfile)
+        except ParsingException as e:
+            return html.Div(
+                dcc.Markdown(str(e)),
+                style={
+                    'border-style': 'solid',
+                    'border-width': '1px',
+                    'margin': '10px',
+                    'width': '100%',
+                    'padding': '10px 2em'
+                }
+            ), dash.no_update, dash.no_update
 
     # Generate Ballot lists and results
     results = {}
@@ -91,21 +111,22 @@ def handle_file_upload(
         ballots[name] = election.ballots.tolist()
 
     # Make Results String
-    result_string = []
-    for election, (winner, steps) in results.items():
-        result_string.append(f"Election: {election} | Winner: {winner}")
-        result_string.append(html.Br())
-    return result_string, results, ballots
+    data = []
+    for election, (winner, _) in results.items():
+        data.append({"Election": election, "Winner": winner})
+    columns = [{'name': "Election", 'id': "Election"},
+               {'name': "Winner", 'id': "Winner"}]
+    table = get_styled_table(data, columns, sort_filter=False)
+    return table, results, ballots
 
 
 @app.callback(
-    Output('steps-link-button', 'style'),
-    Output('ballots-link-button', 'style'),
-    Input('irv-results-store', 'data'),
-    prevent_initial_call=True
+    Output('steps-link-button', 'hidden'),
+    Output('ballots-link-button', 'hidden'),
+    Input('irv-results-store', 'data')
 )
-def show_buttons(data: tuple) -> tuple[dict[str, str], dict[str, str]]:
+def show_buttons(data: tuple) -> tuple[bool, bool]:
     if not data:
-        return {'display': 'none'}, {'display': 'none'}
+        return True, True
     else:
-        return {'display': 'inline'}, {'display': 'inline'}
+        return False, False

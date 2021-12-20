@@ -3,7 +3,8 @@ from typing import Any
 from dash import html
 import dash_bootstrap_components as dbc
 from dash import dcc
-from dash import dash_table
+
+from wildcat_irv.layouts.table import get_styled_table
 
 NUM_TABLE_COLUMNS = 3
 
@@ -25,35 +26,20 @@ def populate_table(data: dict[list[list[str]]]) -> Any:
     """
     if not data:
         return [HEADER_ROW, dbc.Row(dbc.Col("Please upload a WC csv first"))]
+
     ballot_columns = [
         dbc.Col(
-        [
             html.Div(
-               children=[
-                   html.H2(election_name),
-                   dash_table.DataTable(
-                    id=f'ballot_table_{election_name}',
-                    columns=[{"name": f"Choice {i}", "id": str(i)}
-                             for i in range(1, len(ballot_data[0]) + 1)],
-                    data=[{str(i): vote for i, vote in enumerate(row, start=1)} for row in ballot_data],
-                    style_header={
-                        'backgroundColor': '#836EAA'
-                    },
-                    style_data={
-                        'backgroundColor': '#716C6B',
-                        'height': 'auto'
-                    },
-                    style_cell={
-                        'textAlign': 'left',
-                        'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
-                    },
-                    sort_action='native',
-                    editable=False,
-                    filter_action='native',
-                    fill_width=False
-                )]
+                children=[
+                    html.H2(election_name),
+                    get_styled_table(
+                        data=[{str(i): vote for i, vote in enumerate(row, start=1)} for row in ballot_data],
+                        columns=[{"name": f"Choice {i}", "id": str(i)}
+                                 for i in range(1, len(ballot_data[0]) + 1)],
+                    )
+                ]
             )
-        ], width=12 // NUM_TABLE_COLUMNS,
+        , width=12 // NUM_TABLE_COLUMNS,
             style={
                 'width': f'{100 // NUM_TABLE_COLUMNS}%',
                 'display': 'inline-block',
