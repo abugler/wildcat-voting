@@ -36,6 +36,38 @@ button {
 a {
   text-decoration: none;
 }
+// https://community.plotly.com/t/change-textcolor-for-dropdown-menu/35230/3
+// Dropdown Menu
+.Select-control {
+    background-color: white;
+}
+
+.VirtualizedSelectOption {
+    background-color: black;
+    color: white;
+ }
+
+.Select--single > .Select-control .Select-value, .Select-placeholder {
+    border: 1px solid grey;
+    border-radius: 4px;
+}
+
+/* dropdown menu hover effect */
+.VirtualizedSelectFocusedOption {
+    background-color: black;
+    opacity: .7;
+}
+
+
+/* border on focus - default is blue
+ * shadow box around input box.  default is blue
+ */
+.is-focused:not(.is-open) > .Select-control {
+  border-color: var(--primary);
+  box-shadow: none;
+}
+
+// End Dropdown Menu
 
 .raise:hover,
 .raise:focus {

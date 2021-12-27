@@ -22,7 +22,7 @@ layout = [
         id='irv-header',
         children=dbc.Col(html.H2("Wildcat Connection IRV")),
         style={
-            "padding": "15% 0 0 0"
+            "padding": "10% 0 0 0"
         },
         align='end'
     ),

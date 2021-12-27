@@ -6,7 +6,7 @@ from dash import dcc
 
 from wildcat_irv.layouts.table import get_styled_table
 
-NUM_TABLE_COLUMNS = 3
+NUM_TABLE_COLUMNS = 2
 
 layout = html.Div(id='ballot-layout-div')
 
@@ -14,6 +14,7 @@ HEADER_ROW = dbc.Row([
     dbc.Col(dcc.Link(html.Div("Back", className='centerBlock'), href='/election'), width=3),
     dbc.Col(html.H1("Instant Runoff Voting Ballots"), width=6)
 ], justify='start', align='center')
+
 
 def populate_table(data: dict[list[list[str]]]) -> Any:
     """
@@ -39,7 +40,8 @@ def populate_table(data: dict[list[list[str]]]) -> Any:
                     )
                 ]
             )
-        , width=12 // NUM_TABLE_COLUMNS,
+        ,
+            width=12 // NUM_TABLE_COLUMNS,
             style={
                 'width': f'{100 // NUM_TABLE_COLUMNS}%',
                 'display': 'inline-block',

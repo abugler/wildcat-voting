@@ -19,7 +19,6 @@ layout = [
         dbc.Col(html.H1("Instant Runoff Voting Steps"), width=6)
     ], justify='start', align='center'),
     dbc.Row([
-        dbc.Col(html.H4("Election: "), width=1),
         dbc.Col(dcc.Dropdown(id='steps-election-dropdown'), width=2),
         dbc.Col(
             html.Img(
@@ -55,7 +54,6 @@ layout = [
                 id='steps-bar-chart-div',
                 style={
                     'width': '80%',
-                    'display': 'inline-block',
                     'border-style': 'solid',
                     'border-width': '1px',
                     'border-color': 'white'
@@ -64,20 +62,22 @@ layout = [
             width=6
         ),
         dbc.Col(
-            html.Center([
-                html.H2("Current Ballot"),
-                html.Div(id='steps-data-table-div')
+            [
+                dbc.Row(
+                    dbc.Col(html.H2("Current Ballot"))
+                ),
+                dbc.Row(
+                    dbc.Col(html.Div(id='steps-data-table-div'))
+                )
             ], style={
-                'width': '90%',
                 'border-style': 'solid',
                 'border-width': '1px',
                 'border-color': 'white'
-            }
-            ),
+            },
             width=6,
             align='top'
         )
-    ]),
+    ])
 ]
 
 
@@ -144,10 +144,12 @@ def update_num_step(
     Output('steps-bar-chart-div', 'children'),
     Input('step-number', 'children'),
     State('steps-election-dropdown', 'value'),
-    State('irv-results-store', 'data')
+    State('irv-results-store', 'data'),
+    State('irv-ballots-store', 'data')
 )
 def populate_bar_chart(
-    step_num: str, selected_election: str, results_data: RawResults
+    step_num: str, selected_election: str, results_data: RawResults,
+    ballot_data: dict[str, list[list[str]]]
 ) -> dcc.Graph:
     if not results_data:
         return dash.no_update
@@ -160,13 +162,20 @@ def populate_bar_chart(
         candidates.append(c)
         values.append(v)
 
+    barplot = go.Bar(x=candidates, y=values)
+
     figure = go.Figure([
-        go.Bar(x=candidates, y=values)
+        barplot
     ])
+    num_to_win = len(ballot_data[selected_election]) // 2 + 1
+    figure.add_hline(
+        num_to_win,
+        annotation_text="Win Threshold"
+    )
 
     figure.update_layout(
-        xaxis_title='Candidates',
-        yaxis_title='Number of First Place Votes',
+        xaxis_title="Candidates",
+        yaxis_title="Number of First Place Votes",
         title_text="Current First Place Vote Tallies",
         template='plotly_dark'
     )
