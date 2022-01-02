@@ -1,7 +1,8 @@
 from dash import dcc
 import dash_bootstrap_components as dbc
+import pathlib
 
-with open('assets/about.md') as f:
+with open(pathlib.Path(__file__).parent.parent / 'assets/about.md') as f:
     about_md_text = f.read()
 
 

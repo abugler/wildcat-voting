@@ -1,8 +1,9 @@
 from dash import dcc
 import dash_bootstrap_components as dbc
 from dash import html
+import pathlib
 
-with open('assets/setting_up_election.md') as f:
+with open(pathlib.Path(__file__).parent.parent / 'assets/setting_up_election.md') as f:
     instructions_md_text = f.read()
 
 
