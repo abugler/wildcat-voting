@@ -141,7 +141,7 @@ def handle_file_upload(
         data.append({"Election": election, "Winner": winner, "# of Valid Votes": len(ballots[election])})
     columns = [{'name': "Election", 'id': "Election"},
                {'name': "Winner", 'id': "Winner"},
-               {'name': "# of Votes", 'id': "# of Votes"}]
+               {'name': "# of Valid Votes", 'id': "# of Valid Votes"}]
     table = get_styled_table(data, columns, sort_filter=False)
     return table, results, ballots
 
