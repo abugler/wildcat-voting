@@ -14,12 +14,29 @@ from wildcat_connection.utils import ParsingException
 
 from wildcat_irv.app import app
 from wildcat_irv.layouts.table import get_styled_table
+from wildcat_irv.layouts.stores import RawResults, IRVElectionResults
 
 CSV_ENDING = '.csv'
 
 layout = [
     dbc.Row(
-        id='irv-header',
+        id='irv-info-row',
+        children=[
+            dbc.Col(
+                dcc.Link(html.H4("About"), href='/about'),
+                width=1),
+            dbc.Col(
+                dcc.Link(html.H4("Setting up IRV Election"), href='/instructions'),
+                width=2)
+        ],
+        justify='end',
+        align='end',
+        style={
+            'margin-top': '15px'
+        }
+    ),
+    dbc.Row(
+        id='irv-title',
         children=dbc.Col(html.H2("Wildcat Connection IRV")),
         style={
             "padding": "10% 0 0 0"
@@ -63,6 +80,13 @@ layout = [
     ], justify='center')
 ]
 
+about_model = dbc.Modal(
+    [
+        dbc.ModalHeader(dbc.ModalTitle("About")),
+        dbc.ModalBody()
+    ]
+)
+
 
 @app.callback(
     Output('winner-table-div', 'children'),
@@ -70,17 +94,18 @@ layout = [
     Output('irv-ballots-store', 'data'),
     Input('upload-wc-csv', 'filename'),
     State('upload-wc-csv', 'contents'),
-    prevent_initial_call=True
+    State('irv-results-store', 'data')
 )
 def handle_file_upload(
     filename: str,
-    contents: str
+    contents: str,
+    cached_results_data: RawResults
 ) -> tuple[Any, dict, dict]:
     """Computes winner from Wildcat Connection Election"""
     if filename is None:
         return dash.no_update, dash.no_update, dash.no_update  # noqa
     if not filename.endswith(CSV_ENDING):
-        return "Incorrect filetype passed!", dash.no_update, dash.no_update  # noqa
+        return "Incorrect filetype passed!", {}, {}  # noqa
     # TODO: If slowness is a problem, then do not write to a tempfile.
     content_type, content_string = contents.split(',')
     decoded = base64.b64decode(content_string)
@@ -99,7 +124,7 @@ def handle_file_upload(
                     'width': '100%',
                     'padding': '10px 2em'
                 }
-            ), dash.no_update, dash.no_update
+            ), {}, {}
 
     # Generate Ballot lists and results
     results = {}
@@ -110,12 +135,13 @@ def handle_file_upload(
         results[name] = (winner, steps)
         ballots[name] = election.ballots.tolist()
 
-    # Make Results String
+    # Make Results Table
     data = []
     for election, (winner, _) in results.items():
-        data.append({"Election": election, "Winner": winner})
+        data.append({"Election": election, "Winner": winner, "# of Valid Votes": len(ballots[election])})
     columns = [{'name': "Election", 'id': "Election"},
-               {'name': "Winner", 'id': "Winner"}]
+               {'name': "Winner", 'id': "Winner"},
+               {'name': "# of Votes", 'id': "# of Votes"}]
     table = get_styled_table(data, columns, sort_filter=False)
     return table, results, ballots
 
@@ -130,3 +156,4 @@ def show_buttons(data: tuple) -> tuple[bool, bool]:
         return True, True
     else:
         return False, False
+

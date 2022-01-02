@@ -4,7 +4,7 @@ from dash import dcc
 store_irv_results = dcc.Store(id='irv-results-store')
 store_irv_ballot = dcc.Store(id='irv-ballots-store')
 
-
+RawResults = dict[str, tuple[str, list[dict]]]
 class IRVElectionResults:
     """
     Contains the output of election results. This converts the JSON serializable

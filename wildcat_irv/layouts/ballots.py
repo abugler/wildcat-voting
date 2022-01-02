@@ -11,8 +11,14 @@ NUM_TABLE_COLUMNS = 2
 layout = html.Div(id='ballot-layout-div')
 
 HEADER_ROW = dbc.Row([
-    dbc.Col(dcc.Link(html.Div("Back", className='centerBlock'), href='/election'), width=3),
-    dbc.Col(html.H1("Instant Runoff Voting Ballots"), width=6)
+    dbc.Col(dcc.Link(html.Img(src='assets/img/back_button.png',
+                     id='back-button',
+                     style={
+                         'height': '50px',
+                         'width': '50px'
+                     }),
+                     href='/election'), width=1),
+    dbc.Col(html.H1("Instant Runoff Voting Steps"), width={'size': 6, 'offset': 2})
 ], justify='start', align='center')
 
 
@@ -52,10 +58,14 @@ def populate_table(data: dict[list[list[str]]]) -> Any:
     ]
 
     rows = [
-        dbc.Row(children=ballot_columns[idx:idx+NUM_TABLE_COLUMNS])
+        dbc.Row(
+            children=ballot_columns[idx:idx+NUM_TABLE_COLUMNS]
+        )
         for idx in range(0, len(ballot_columns), NUM_TABLE_COLUMNS)
     ]
     rows.insert(0, HEADER_ROW)
+    buffer_row = dbc.Row(dbc.Col(style={'margin-bottom': '3em'}))
+    rows.append(buffer_row)
     return rows
 
 

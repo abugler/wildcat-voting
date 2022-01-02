@@ -8,15 +8,20 @@ from dash.dash_table import DataTable
 
 
 from wildcat_irv.app import app
-from wildcat_irv.layouts.stores import IRVElectionResults
+from wildcat_irv.layouts.stores import IRVElectionResults, RawResults
 from wildcat_irv.layouts.table import get_styled_table
-
-RawResults = dict[str, tuple[str, list[dict]]]
 
 layout = [
     dbc.Row([
-        dbc.Col(dcc.Link(html.Div("Back", className='centerBlock'), href='/election'), width=3),
-        dbc.Col(html.H1("Instant Runoff Voting Steps"), width=6)
+        dbc.Col(dcc.Link(
+            html.Img(src='assets/img/back_button.png',
+                     id='back-button',
+                     style={
+                         'height': '50px',
+                         'width': '50px'
+                     }),
+            href='/election'), width=1),
+        dbc.Col(html.H1("Instant Runoff Voting Steps"), width={'size': 6, 'offset': 2})
     ], justify='start', align='center'),
     dbc.Row([
         dbc.Col(dcc.Dropdown(id='steps-election-dropdown'), width=2),
